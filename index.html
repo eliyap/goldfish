@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goldfish</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Goldfish</h1>
+
+    <form id="login-form" autocomplete="on">
+      <label for="username">Provider</label>
+      <input type="text" id="username" name="username" autocomplete="username" list="providers" value="Claude">
+      <datalist id="providers">
+        <option value="Claude">
+        <option value="OpenAI">
+        <option value="OpenAI-Flex">
+      </datalist>
+      <label for="api-key">API Key</label>
+      <input type="password" id="api-key" name="password" autocomplete="current-password"
+             placeholder="sk-ant-... or sk-..." required>
+      <button type="submit">Unlock</button>
+    </form>
+
+    <div id="main" hidden>
+      <form id="ask-form">
+        <textarea id="question" rows="2" placeholder="What is the capital of Namibia?" required></textarea>
+        <button type="submit" id="ask-btn">Ask</button>
+      </form>
+      <div id="answer"></div>
+      <button id="lock-btn">Lock</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
