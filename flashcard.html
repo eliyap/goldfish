@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <form id="flashcard-form">
+      <label for="prompt">System prompt</label>
+      <textarea id="prompt" rows="12">You are a Japanese flashcard generator. When given a word, use web search to look it up on Wiktionary and find example sentences on tatoeba.org.
+
+Produce a flashcard in this exact format:
+
+# [English meaning(s)]
+[optional example or context line]
+#[part of speech]
+---
+# [kanji with inline furigana in parentheses, e.g. 食(た)べる]
+#past {{[past form]}}
+#negative {{[negative form]}}
+#potential {{[potential form]}}
+#volitional {{[volitional form]}}
+
+Rules:
+- Furigana goes in parentheses after each kanji: 持(も)つ, 悲(かな)しい
+- Only include conjugation lines that apply (verbs get conjugations, adjectives/nouns may not)
+- Part of speech tag is one of: #verb, #adjective, #adverb, #noun, #particle, #expression
+- Output ONLY the flashcard, no explanation</textarea>
+      <label for="term">Word or phrase</label>
+      <div class="input-row">
+        <textarea id="term" rows="1" placeholder="食べる" required></textarea>
+        <button type="submit" id="go-btn">Go</button>
+      </div>
+    </form>
+    <div id="answer-wrap">
+      <div id="answer"></div>
+      <button id="copy-btn" hidden>Copy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { shell } from './js/shell.js';
+    import { chat } from './js/llm.js';
+
+    if (!shell({ title: 'Flashcard' })) throw new Error('redirecting');
+
+    const form = document.getElementById('flashcard-form');
+    const promptEl = document.getElementById('prompt');
+    const termEl = document.getElementById('term');
+    const goBtn = document.getElementById('go-btn');
+    const answerEl = document.getElementById('answer');
+    const copyBtn = document.getElementById('copy-btn');
+    let rawMarkdown = '';
+
+    function copyText(text) {
+      if (navigator.clipboard) {
+        return navigator.clipboard.writeText(text);
+      }
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    copyBtn.addEventListener('click', () => {
+      copyText(rawMarkdown);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+
+    termEl.focus();
+
+    termEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.metaKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    const WEB_SEARCH = {
+      type: 'web_search_20250305',
+      name: 'web_search',
+      max_uses: 5,
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const t = termEl.value.trim();
+      if (!t) return;
+
+      goBtn.disabled = true;
+      copyBtn.hidden = true;
+      answerEl.textContent = '...';
+
+      rawMarkdown = await chat(
+        [{ role: 'user', content: t }],
+        { system: promptEl.value.trim(), tools: [WEB_SEARCH] },
+      );
+      answerEl.textContent = rawMarkdown;
+      copyBtn.hidden = false;
+      goBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>

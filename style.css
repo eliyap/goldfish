@@ -83,13 +83,21 @@ button[type="submit"]:hover { background: #444; }
 button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Main area */
+.input-row,
 #ask-form {
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
 }
 
+.input-row textarea { flex: 1; }
 #ask-form textarea { flex: 1; }
+
+#grammar-form label,
+#flashcard-form label { margin-top: 0.75rem; }
+
+#grammar-form label:first-child,
+#flashcard-form label:first-child { margin-top: 0; }
 
 #answer-wrap { margin-top: 1rem; }
 

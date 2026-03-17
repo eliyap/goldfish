@@ -24,7 +24,16 @@ const PROVIDERS = {
   },
 };
 
-async function anthropicCall(apiKey, model, messages) {
+async function anthropicCall(apiKey, model, messages, opts = {}) {
+  const body = { model, max_tokens: 4096, messages };
+  if (opts.system) {
+    body.system = [{
+      type: 'text',
+      text: opts.system,
+      cache_control: { type: 'ephemeral' },
+    }];
+  }
+  if (opts.tools) body.tools = opts.tools;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -33,19 +42,20 @@ async function anthropicCall(apiKey, model, messages) {
       'content-type': 'application/json',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
-    body: JSON.stringify({ model, max_tokens: 1024, messages }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Anthropic ${res.status}: ${err}`);
   }
   const data = await res.json();
-  return data.content.map(b => b.text).join('');
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
 }
 
 async function openaiCall(apiKey, model, messages, opts = {}) {
-  const body = { model, max_tokens: 1024, messages };
+  const body = { model, max_tokens: 4096, messages };
   if (opts.flex) body.service_tier = 'flex';
+  if (opts.system) messages = [{ role: 'system', content: opts.system }, ...messages];
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -62,7 +72,7 @@ async function openaiCall(apiKey, model, messages, opts = {}) {
   return data.choices[0].message.content;
 }
 
-export async function chat(messages) {
+export async function chat(messages, { system, tools } = {}) {
   const apiKey = getApiKey();
   const providerName = getProvider();
   if (!apiKey || !providerName) throw new Error('No API key');
@@ -70,5 +80,5 @@ export async function chat(messages) {
   const provider = PROVIDERS[providerName];
   if (!provider) throw new Error(`Unknown provider: ${providerName}`);
 
-  return provider.call(apiKey, provider.model, messages, { flex: provider.flex });
+  return provider.call(apiKey, provider.model, messages, { system, tools, flex: provider.flex });
 }

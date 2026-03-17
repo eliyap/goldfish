@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <form id="grammar-form">
+      <label for="prompt">Prompt</label>
+      <textarea id="prompt" rows="3">Is this Japanese sentence grammatical? If not, explain the error briefly and provide the corrected sentence.</textarea>
+      <label for="sentence">Sentence</label>
+      <div class="input-row">
+        <textarea id="sentence" rows="1" placeholder="日本語の文を入力してください" required></textarea>
+        <button type="submit" id="check-btn">Check</button>
+      </div>
+    </form>
+    <div id="answer-wrap">
+      <div id="answer"></div>
+      <button id="copy-btn" hidden>Copy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { shell } from './js/shell.js';
+    import { chat } from './js/llm.js';
+
+    if (!shell({ title: 'Grammar' })) throw new Error('redirecting');
+
+    const form = document.getElementById('grammar-form');
+    const promptEl = document.getElementById('prompt');
+    const sentenceEl = document.getElementById('sentence');
+    const checkBtn = document.getElementById('check-btn');
+    const answerEl = document.getElementById('answer');
+    const copyBtn = document.getElementById('copy-btn');
+    let rawMarkdown = '';
+
+    function copyText(text) {
+      if (navigator.clipboard) {
+        return navigator.clipboard.writeText(text);
+      }
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    copyBtn.addEventListener('click', () => {
+      copyText(rawMarkdown);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+
+    sentenceEl.focus();
+
+    sentenceEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.metaKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const s = sentenceEl.value.trim();
+      if (!s) return;
+
+      const message = promptEl.value.trim() + '\n\n' + s;
+
+      checkBtn.disabled = true;
+      copyBtn.hidden = true;
+      answerEl.textContent = '...';
+      rawMarkdown = await chat([{ role: 'user', content: message }]);
+      answerEl.textContent = rawMarkdown;
+      copyBtn.hidden = false;
+      checkBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
