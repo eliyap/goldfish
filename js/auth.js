@@ -25,7 +25,7 @@ export function logout() {
 
 export function requireAuth() {
   if (!isLoggedIn()) {
-    window.location.href = '/';
+    window.location.href = './';
     return false;
   }
   return true;

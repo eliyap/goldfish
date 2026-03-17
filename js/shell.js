@@ -10,7 +10,7 @@ export function shell({ title, auth = true }) {
 
   if (title) {
     const a = document.createElement('a');
-    a.href = '/';
+    a.href = './';
     a.textContent = 'Goldfish';
     h1.append(a, ' / ' + title);
   } else {
@@ -25,7 +25,7 @@ export function shell({ title, auth = true }) {
     btn.textContent = 'Logout';
     btn.addEventListener('click', () => {
       logout();
-      window.location.href = '/';
+      window.location.href = './';
     });
     header.append(btn);
   }
