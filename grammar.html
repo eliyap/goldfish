@@ -8,8 +8,10 @@
 <body>
   <div id="app">
     <form id="grammar-form">
-      <label for="prompt">Prompt</label>
-      <textarea id="prompt" rows="3">Is this Japanese sentence grammatical? If not, explain the error briefly and provide the corrected sentence.</textarea>
+      <details>
+        <summary>System prompt</summary>
+        <textarea id="prompt" rows="3">Is this Japanese sentence grammatical? If not, explain the error briefly and provide the corrected sentence.</textarea>
+      </details>
       <label for="sentence">Sentence</label>
       <div class="input-row">
         <textarea id="sentence" rows="1" placeholder="日本語の文を入力してください" required></textarea>

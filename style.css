@@ -93,6 +93,19 @@ button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; }
 .input-row textarea { flex: 1; }
 #ask-form textarea { flex: 1; }
 
+details {
+  margin-bottom: 0.75rem;
+}
+
+summary {
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.3rem;
+}
+
+details textarea { margin-top: 0.3rem; }
+
 #grammar-form label,
 #flashcard-form label { margin-top: 0.75rem; }
 

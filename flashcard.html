@@ -8,26 +8,37 @@
 <body>
   <div id="app">
     <form id="flashcard-form">
-      <label for="prompt">System prompt</label>
-      <textarea id="prompt" rows="12">You are a Japanese flashcard generator. When given a word, use web search to look it up on Wiktionary and find example sentences on tatoeba.org.
+      <details>
+        <summary>System prompt</summary>
+        <textarea id="prompt" rows="16">You are a Japanese flashcard generator for Mochi flashcard app. When given a word, use web search to look it up on Wiktionary and find example sentences on tatoeba.org.
 
-Produce a flashcard in this exact format:
+Produce a flashcard in this exact format. The --- divider separates the FRONT (English) from the BACK (Japanese). No Japanese text may appear above the ---.
 
-# [English meaning(s)]
-[optional example or context line]
+FRONT (English only, no Japanese):
+# English meaning(s)
+[optional English context, e.g. "e.g. it's a bit small"]
 #[part of speech]
 ---
-# [kanji with inline furigana in parentheses, e.g. 食(た)べる]
+BACK (Japanese):
+# [kanji with inline furigana](URL to Wiktionary or dictionary source)
+[Example:](URL to tatoeba.org sentence) Japanese example sentence
+English translation of the example.
 #past {{[past form]}}
 #negative {{[negative form]}}
 #potential {{[potential form]}}
 #volitional {{[volitional form]}}
 
 Rules:
-- Furigana goes in parentheses after each kanji: 持(も)つ, 悲(かな)しい
-- Only include conjugation lines that apply (verbs get conjugations, adjectives/nouns may not)
-- Part of speech tag is one of: #verb, #adjective, #adverb, #noun, #particle, #expression
-- Output ONLY the flashcard, no explanation</textarea>
+- NOTHING in Japanese above the --- line. The front of the card is English only.
+- Definitions MUST link to their source (Wiktionary, Jisho, etc.)
+- Citations use the format [Example:](URL) followed by the text, e.g. [Example:](https://tatoeba.org/...) 食べました
+- The h1 Japanese word on the back is the link to the definition source, e.g. # [食(た)べる](https://en.wiktionary.org/wiki/食べる)
+- English translation goes on the next line after the example
+- Furigana in parentheses after each kanji: 食(た)べる, 持(も)つ, 悲(かな)しい
+- Only include conjugation lines for verbs
+- Part of speech: #verb, #adjective, #adverb, #noun, #particle, #expression
+- Output ONLY the flashcard, no preamble or explanation</textarea>
+      </details>
       <label for="term">Word or phrase</label>
       <div class="input-row">
         <textarea id="term" rows="1" placeholder="食べる" required></textarea>
