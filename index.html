@@ -8,32 +8,68 @@
 </head>
 <body>
   <div id="app">
-    <h1>Goldfish</h1>
-
     <form id="login-form" autocomplete="on">
       <label for="username">Provider</label>
-      <input type="text" id="username" name="username" autocomplete="username" list="providers" value="Claude">
+      <input type="text" id="username" name="username" autocomplete="username" list="providers" value="Sonnet">
       <datalist id="providers">
-        <option value="Claude">
+        <option value="Haiku">
+        <option value="Sonnet">
+        <option value="Opus">
         <option value="OpenAI">
         <option value="OpenAI-Flex">
       </datalist>
       <label for="api-key">API Key</label>
       <input type="password" id="api-key" name="password" autocomplete="current-password"
              placeholder="sk-ant-... or sk-..." required>
-      <button type="submit">Unlock</button>
+      <button type="submit" id="unlock-btn">Unlock</button>
+      <div id="login-error"></div>
     </form>
 
-    <div id="main" hidden>
-      <form id="ask-form">
-        <textarea id="question" rows="2" placeholder="What is the capital of Namibia?" required></textarea>
-        <button type="submit" id="ask-btn">Ask</button>
-      </form>
-      <div id="answer"></div>
-      <button id="lock-btn">Lock</button>
-    </div>
+    <nav id="apps" hidden>
+      <ul>
+        <li><a href="/ask.html">Ask</a></li>
+      </ul>
+    </nav>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module">
+    import { shell } from './js/shell.js';
+    import { isLoggedIn, login, validate } from './js/auth.js';
+
+    shell({ auth: false });
+
+    const loginForm = document.getElementById('login-form');
+    const appsEl = document.getElementById('apps');
+    const unlockBtn = document.getElementById('unlock-btn');
+    const loginError = document.getElementById('login-error');
+
+    function show() {
+      const loggedIn = isLoggedIn();
+      loginForm.hidden = loggedIn;
+      appsEl.hidden = !loggedIn;
+    }
+
+    show();
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const provider = document.getElementById('username').value.trim();
+      const key = document.getElementById('api-key').value.trim();
+      if (!key || !provider) return;
+
+      unlockBtn.disabled = true;
+      loginError.textContent = '';
+
+      try {
+        await validate(provider, key);
+        login(provider, key);
+        window.location.reload();
+      } catch (err) {
+        loginError.textContent = err.message;
+      } finally {
+        unlockBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <form id="ask-form">
+      <textarea id="question" rows="2" placeholder="What is the capital of Namibia?" required></textarea>
+      <button type="submit" id="ask-btn">Ask</button>
+    </form>
+    <div id="answer-wrap">
+      <div id="answer"></div>
+      <button id="copy-btn" hidden>Copy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { shell } from './js/shell.js';
+    import { chat } from './js/llm.js';
+
+    if (!shell({ title: 'Ask' })) throw new Error('redirecting');
+
+    const askForm = document.getElementById('ask-form');
+    const questionEl = document.getElementById('question');
+    const askBtn = document.getElementById('ask-btn');
+    const answerEl = document.getElementById('answer');
+    const copyBtn = document.getElementById('copy-btn');
+    let rawMarkdown = '';
+
+    function copyText(text) {
+      if (navigator.clipboard) {
+        return navigator.clipboard.writeText(text);
+      }
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    copyBtn.addEventListener('click', () => {
+      copyText(rawMarkdown);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+
+    questionEl.focus();
+
+    questionEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.metaKey) {
+        e.preventDefault();
+        askForm.requestSubmit();
+      }
+    });
+
+    askForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = questionEl.value.trim();
+      if (!q) return;
+
+      askBtn.disabled = true;
+      copyBtn.hidden = true;
+      answerEl.textContent = '...';
+      rawMarkdown = await chat([{ role: 'user', content: q }]);
+      answerEl.textContent = rawMarkdown;
+      copyBtn.hidden = false;
+      askBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
