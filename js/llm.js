@@ -6,11 +6,11 @@ const PROVIDERS = {
     call: anthropicCall,
   },
   'Sonnet': {
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     call: anthropicCall,
   },
   'Opus': {
-    model: 'claude-opus-4-20250514',
+    model: 'claude-opus-4-8',
     call: anthropicCall,
   },
   'OpenAI': {
